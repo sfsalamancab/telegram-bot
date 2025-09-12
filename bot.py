@@ -1,8 +1,9 @@
+import os
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-# Tu token
-TOKEN = "8324581126:AAE5TnIQSxqIkKm7DJ9nV2Kq--lLcjbjYNY"
+# Token tomado de las variables de entorno (en Render configuraste BOT_TOKEN)
+TOKEN = os.getenv("BOT_TOKEN")
 
 # Función de bienvenida con menú
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -13,8 +14,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = ReplyKeyboardMarkup(
         keyboard,
         resize_keyboard=True,
-        one_time_keyboard=False,  # <- botones siempre visibles
-        is_persistent=True        # <- corrección aquí
+        one_time_keyboard=False,  # botones siempre visibles
+        is_persistent=True        # menú persistente
     )
 
     await update.message.reply_text(
@@ -40,6 +41,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Función principal
 def main():
+    if not TOKEN:
+        raise ValueError("❌ No se encontró BOT_TOKEN en las variables de entorno.")
+
     app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -50,4 +54,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
