@@ -1,0 +1,16 @@
+# Sistema / editor
+.DS_Store
+__pycache__/
+*.pyc
+
+# Entornos locales (no subir)
+venv/
+
+# Archivos temporales de Office (no subir)
+~$*.docx
+~$*.doc
+~$*.xlsx
+~$*.xls
+
+# Variables locales (si algún día usas .env)
+.env
