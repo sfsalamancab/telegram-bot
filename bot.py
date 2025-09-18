@@ -69,6 +69,17 @@ async def accion_tutela_info(update: Update, context: ContextTypes.DEFAULT_TYPE)
         parse_mode="Markdown"
     )
 
+async def preguntas_frecuentes(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "❓ *Preguntas Frecuentes*\n\n"
+        "🔹 ¿Necesito abogado para presentar un Derecho de Petición? → No, es gratuito y no requiere abogado.\n"
+        "🔹 ¿Qué hago si no me responden un Derecho de Petición? → Puedes acudir a la Acción de Tutela.\n"
+        "🔹 ¿Cuánto tarda la respuesta de una tutela? → Máximo 10 días hábiles.\n"
+        "🔹 ¿Dónde puedo presentar una tutela? → De manera presencial o virtual en: "
+        "[Radicar Tutela en Línea](https://procesojudicial.ramajudicial.gov.co/tutelaenlinea)",
+        parse_mode="Markdown"
+    )
+
 # --- Formatos ---
 async def formatos(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
@@ -81,9 +92,11 @@ async def formatos(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def derecho_peticion_doc(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_document(open("derecho_peticion.docx", "rb"))
+    await derecho_peticion_info(update, context)
 
 async def accion_tutela_doc(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_document(open("accion_tutela.docx", "rb"))
+    await accion_tutela_info(update, context)
 
 # --- Consultorio Jurídico ---
 async def consultorio_juridico(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -111,15 +124,18 @@ async def apoyanos(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Tu apoyo nos ayuda a seguir defendiendo derechos 💜", reply_markup=reply_markup)
 
 async def donar_nequi(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_photo(
-        open("qr_nequi.jpeg", "rb"),
-        caption=(
-            "🌐 *Donar con Nequi (QR y Llave)*\n\n"
-            "Escanea este QR con tu app de Nequi para realizar tu donación.\n\n"
-            "🔑 También puedes donar usando la **Llave Nequi – Bre-B**: *0090702453*"
-        ),
-        parse_mode="Markdown"
-    )
+    try:
+        await update.message.reply_photo(
+            open("qr_nequi.jpeg", "rb"),
+            caption=(
+                "🌐 *Donar con Nequi (QR y Llave)*\n\n"
+                "Escanea este QR con tu app de Nequi para realizar tu donación.\n\n"
+                "🔑 También puedes hacer tu donativo usando la **Llave Nequi – Bre-B**: *0090702453*"
+            ),
+            parse_mode="Markdown"
+        )
+    except FileNotFoundError:
+        await update.message.reply_text("❌ No encontré el archivo del QR. Verifica que `qr_nequi.jpeg` esté en el repositorio.")
 
 async def redes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -135,8 +151,10 @@ async def redes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def contactanos(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "📞 *Contáctanos*\n\n"
-        "Si necesitas un formato diferente o una orientación especial, agenda una entrevista aquí:\n"
-        "👉 [Reservar cita en Calendly](https://calendly.com/sfsalamancab/30min)",
+        "Si necesitas un formato diferente o una orientación especial:\n"
+        "📅 Agenda tu cita en Calendly → [Haz clic aquí](https://calendly.com/sfsalamancab/30min)\n\n"
+        "📱 También puedes escribirnos al WhatsApp oficial:\n"
+        "👉 [3202484520](https://wa.me/573202484520)",
         parse_mode="Markdown"
     )
 
@@ -151,6 +169,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "ℹ️ Información General": informacion_general,
         "📘 ¿Qué es el Derecho de Petición?": derecho_peticion_info,
         "⚖️ ¿Qué es la Acción de Tutela?": accion_tutela_info,
+        "❓ Preguntas frecuentes": preguntas_frecuentes,
         "📄 Formatos": formatos,
         "📄 Derecho de Petición": derecho_peticion_doc,
         "⚖️ Acción de Tutela": accion_tutela_doc,
@@ -168,6 +187,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --- Función principal ---
 def main():
+    if not TOKEN:
+        raise ValueError("❌ No se encontró TELEGRAM_TOKEN en las variables de entorno.")
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
